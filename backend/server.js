@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { errorHandler } from "./middlewares/error.middleware.js";
+import userRouter from "./routes/all.user.routes.js";
 
 dotenv.config();
 
@@ -26,4 +28,7 @@ app.get("/", (req, res) => {
     res.status(200).send({ success: true, message: "connected to server" })
 });
 
+app.use("/api/user", userRouter);
+
+app.use(errorHandler)
 app.listen(port, () => console.log(`listening on port: ${port}`));

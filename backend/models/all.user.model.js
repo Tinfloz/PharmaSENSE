@@ -38,7 +38,11 @@ allUserSchema.pre("save", async function () {
     this.password = await bcrypt.hash(this.password, salt);
 });
 
-// static methods
-allUserSchema.statics.matchPassword = async function (password) {
+// method 
+allUserSchema.methods.matchPassword = async function (password) {
     return await bcrypt.compare(password, this.password)
 };
+
+const Users = mongoose.model("Users", allUserSchema);
+
+export default Users;
