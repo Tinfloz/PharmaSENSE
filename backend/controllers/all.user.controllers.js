@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import Users from "../models/all.user.model.js";
 import Chemists from "../models/chemist.model.js";
 import Patients from "../models/patient.model.js";
-import { getLatLng } from "../utils/get.lat.lng.js";
 import { getToken } from "../utils/get.token.js";
 
 const register = async (req, res) => {
@@ -97,27 +96,26 @@ const login = async (req, res) => {
     };
 };
 
+// set address
 const setAddress = async (req, res) => {
     try {
-        const { address, state, city, pincode } = req.body;
-        if (!address || !state || !city || !pincode) {
-            throw "fields missing"
-        };
         const patient = await Patients.findOne({ userId: req.user._id });
-        const userAddress = `${address}, ${city}, ${state}`
-        const [latitude, longitude] = await getLatLng(userAddress);
-        patient.address = address;
-        patient.state = state;
-        patient.city = city;
-        patient.pincode = pincode;
-        patient.location = {
-            type: { type: "Point" },
-            coordinates: [latitude, longitude]
+        const { address, longitude, latitude } = req.body;
+        if (!address || !longitude || !latitude) {
+            throw "fields missing";
         };
+        patient.address = address;
+        let location = {
+            type: {
+                type: "Point",
+                coordinates: [longitude, latitude],
+            }
+        };
+        patient.location = location;
         await patient.save();
         res.status(200).json({
             success: true,
-            address, state, city, pincode
+            address
         });
         return
     } catch (error) {

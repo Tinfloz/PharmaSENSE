@@ -9,15 +9,6 @@ const patientSchema = new mongoose.Schema({
     address: {
         type: String
     },
-    city: {
-        type: String
-    },
-    state: {
-        type: String
-    },
-    pincode: {
-        type: String
-    },
     location: {
         type: { type: String, default: 'Point' },
         coordinates: {

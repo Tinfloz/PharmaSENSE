@@ -5,17 +5,23 @@ const deliverySchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: "Patients"
     },
+    location: {
+        type: { type: String, default: 'Point' },
+        coordinates: {
+            type: [Number],
+            default: undefined,
+            required: true
+        }
+    },
     drug: {
         type: mongoose.Types.ObjectId,
         ref: "Drugs"
     },
-    isPaid: {
-        type: Boolean,
-        default: false
+    claimed: {
+        type: mongoose.Types.ObjectId,
+        ref: "Stores",
+        default: undefined
     },
-    paidAt: {
-        type: Date
-    }
 }, { timestamps: true });
 
 const Deliveries = mongoose.model("Deliveries", deliverySchema);

@@ -5,6 +5,10 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import userRouter from "./routes/all.user.routes.js";
+import chemistRouter from "./routes/chemist.routes.js";
+import deliveryRouter from "./routes/delivery.routes.js";
+import patientRouter from "./routes/patient.routes.js";
+import storeRouter from "./routes/store.routes.js"
 
 dotenv.config();
 
@@ -29,6 +33,10 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/user", userRouter);
+app.use("/api/chemist", chemistRouter);
+app.use("/api/delivery", deliveryRouter);
+app.use("/api/patient", patientRouter);
+app.use("/api/store", storeRouter);
 
 app.use(errorHandler)
 app.listen(port, () => console.log(`listening on port: ${port}`));

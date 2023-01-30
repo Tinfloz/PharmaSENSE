@@ -20,6 +20,16 @@ const drugSchema = new mongoose.Schema({
     volume: {
         type: Number,
         required: true
+    },
+    slots: [
+        {
+            type: String,
+            required: true
+        }
+    ],
+    critical: {
+        type: Number,
+        required: true
     }
 }, { timestamps: true });
 
