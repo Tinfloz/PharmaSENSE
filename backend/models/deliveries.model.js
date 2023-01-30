@@ -22,6 +22,10 @@ const deliverySchema = new mongoose.Schema({
         ref: "Stores",
         default: undefined
     },
+    paid: {
+        type: Boolean,
+        default: false
+    }
 }, { timestamps: true });
 
 const Deliveries = mongoose.model("Deliveries", deliverySchema);

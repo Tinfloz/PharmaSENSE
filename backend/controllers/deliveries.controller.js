@@ -18,7 +18,7 @@ const getNearbyDeliveries = async (req, res) => {
                     $maxDistance: 7000
                 }
             }
-        }).populate("patient");
+        }).populate(['patient', 'drug']);
         res.status(200).json({
             deliveries
         });

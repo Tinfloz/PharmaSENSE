@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import Chemists from "../models/chemist.model.js";
 import Deliveries from "../models/deliveries.model.js";
+import Orders from "../models/order.model.js";
+import Patients from "../models/patient.model.js";
 import Stores from "../models/store.model.js";
 
 // create store
@@ -12,7 +14,7 @@ const createStore = async (req, res) => {
         };
         const chemist = await Chemists.findOne({ userId: req.user._id });
         let location = {
-            type: { type: "Point" },
+            type: "Point",
             coordinates: [longitude, latitude]
         };
         const store = await Stores.create({
@@ -156,7 +158,7 @@ const changeAddress = async (req, res) => {
         };
         const { address, longitude, latitude } = req.body;
         let location = {
-            type: { type: "Point" },
+            type: "Point",
             coordinates: [longitude, latitude]
         };
         store.address = address || store.address;
@@ -186,11 +188,45 @@ const changeAddress = async (req, res) => {
     };
 };
 
-
+// create order
+const createOrder = async (req, res) => {
+    try {
+        const { name, patientId, deliveryId, total, tax } = req.body;
+        if (!name || !patient || !total || !tax) {
+            throw "missing fields";
+        };
+        const patient = await Patients.findById(patientId);
+        const delivery = await Deliveries.findById(deliveryId);
+        await Orders.create({
+            name,
+            patient: patient._id,
+            total,
+            tax,
+            delivery: delivery._id
+        });
+        res.status(200).json({
+            success: true
+        });
+        return
+    } catch (error) {
+        if (error === "missing fields") {
+            res.status(400).json({
+                success: false,
+                error: error.errors?.[0]?.message || error
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                error: error.errors?.[0]?.message || error
+            });
+        };
+    };
+};
 
 export {
     createStore,
     deleteStore,
     changeAddress,
     changeStoreName,
+    createOrder
 }

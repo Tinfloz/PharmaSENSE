@@ -3,6 +3,8 @@ import Drugs from "../models/drugs.model.js";
 import Users from "../models/all.user.model.js";
 import mongoose from "mongoose";
 import { getCriticalLevel } from "../utils/get.critical.js";
+import { getDaysUptoCriticalLevel } from "../utils/get.critical.day.js";
+import Orders from "../models/order.model.js";
 
 // create drugs 
 const createMedications = async (req, res) => {
@@ -19,7 +21,8 @@ const createMedications = async (req, res) => {
             volume,
             slots,
             critical: getCriticalLevel(volume),
-            remaining: volume
+            remaining: volume,
+            uptoCriticalLevelDays: getDaysUptoCriticalLevel(volume, dosage, getCriticalLevel(volume), slots.length)
         });
         if (!drug) {
             throw "could not be created";
@@ -112,11 +115,11 @@ const changeDosage = async (req, res) => {
             throw "not authorised"
         };
         drug.dosage = dosage;
+        drug.uptoCriticalLevelDays = getDaysUptoCriticalLevel(drug.volume, drug.dosage, drug.critical, drug.slots.length);
         await drug.save();
         res.status(400).json({
             success: true,
-            id,
-            dosage
+            drug
         });
         return
     } catch (error) {
@@ -138,8 +141,32 @@ const changeDosage = async (req, res) => {
         };
     };
 };
+
+// get orders 
+const getOrders = async (req, res) => {
+    try {
+        const patient = await Patients.findOne({
+            userId: req.user._id
+        });
+        const orders = await Orders.find({
+            patient: patient._id
+        });
+        res.status(200).json({
+            success: true,
+            orders
+        });
+        return
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.errors?.[0]?.message || error
+        });
+    };
+};
+
 export {
     createMedications,
     deleteMedication,
-    changeDosage
+    changeDosage,
+    getOrders
 }
