@@ -5,6 +5,10 @@ import mongoose from "mongoose";
 import { getCriticalLevel } from "../utils/get.critical.js";
 import { getDaysUptoCriticalLevel } from "../utils/get.critical.day.js";
 import Orders from "../models/order.model.js";
+import razorpay from "razorpay";
+import shortid from "shortid";
+import Deliveries from "../models/deliveries.model.js";
+import moment from "moment";
 
 // create drugs 
 const createMedications = async (req, res) => {
@@ -49,99 +53,6 @@ const createMedications = async (req, res) => {
     };
 };
 
-// delete medications 
-const deleteMedication = async (req, res) => {
-    try {
-        const patient = await Patients.findOne({ userId: req.user._id });
-        const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            throw "id invalid"
-        };
-        const drug = await Drugs.findById(id);
-        if (!drug) {
-            throw "drug not found";
-        };
-        if (drug.patient.toString() !== patient._id.toString()) {
-            throw "not authorised to delete";
-        };
-        for (let element of patient.drugs) {
-            if (element.toString() === id) {
-                let index = patient.drugs.indexOf(element);
-                patient.drugs.splice(index, 1);
-                break;
-            };
-        };
-        await drug.remove();
-        await patient.save();
-        res.status(200).json({
-            success: true,
-            id
-        });
-        return
-    } catch (error) {
-        if (error === "drug not found") {
-            res.status(404).json({
-                success: false,
-                error: error.errors?.[0]?.message || error
-            });
-        } else if (error === "not authorised") {
-            res.status(403).json({
-                success: false,
-                error: error.errors?.[0]?.message || error
-            });
-        } else {
-            res.status(500).json({
-                success: false,
-                error: error.errors?.[0]?.message || error
-            });
-        };
-    };
-};
-
-// change dosage 
-const changeDosage = async (req, res) => {
-    try {
-        const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            throw "id invalid"
-        };
-        const { dosage } = req.body;
-        const drug = await Drugs.findById(id);
-        if (!drug) {
-            throw "drug not found";
-        };
-        const patient = await Patients.findOne({ userId: req.user._id });
-        if (drug.patient.toString() !== patient._id.toString()) {
-            throw "not authorised"
-        };
-        drug.dosage = dosage;
-        drug.uptoCriticalLevelDays = getDaysUptoCriticalLevel(drug.volume, drug.dosage, drug.critical, drug.slots.length);
-        await drug.save();
-        res.status(400).json({
-            success: true,
-            drug
-        });
-        return
-    } catch (error) {
-        if (error === "drug not found") {
-            res.status(404).json({
-                success: false,
-                error: error.errors?.[0]?.message || error
-            });
-        } else if (error === "not authorised") {
-            res.status(403).json({
-                success: false,
-                error: error.errors?.[0]?.message || error
-            });
-        } else {
-            res.status(500).json({
-                success: false,
-                error: error.errors?.[0]?.message || error
-            });
-        };
-    };
-};
-
 // get orders 
 const getOrders = async (req, res) => {
     try {
@@ -164,9 +75,106 @@ const getOrders = async (req, res) => {
     };
 };
 
+// pay for order
+const createRazorpayOrder = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw "invalid id";
+        };
+        const order = await Orders.findById(id);
+        if (!order) {
+            throw "order not found"
+        };
+        const rzpInstance = new razorpay({
+            key_id: process.env.RZP_KEY_ID,
+            key_secret: process.env.RZP_KEY_SECRET
+        });
+        const options = {
+            amount: (order.subTotal * 100),
+            currency: "INR",
+            receipt: shortid.generate()
+        };
+        let rzpOrder;
+        try {
+            rzpOrder = await rzpInstance.orders.create(options);
+        } catch (error) {
+            throw new Error("could not be created", { cause: error });
+        };
+        res.status(200).json({
+            success: true,
+            rzpOrder
+        });
+        return
+    } catch (error) {
+        if (error === "order not found") {
+            res.status(404).json({
+                success: false,
+                error: error.errors?.[0]?.message || error
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                error: error.errors?.[0]?.message || error
+            });
+        };
+    };
+};
+
+const verifyPayment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw "id not valid"
+        };
+        const order = await Orders.findById(id);
+        if (!order) {
+            throw "order not found";
+        };
+        const delivery = await Deliveries.findById(order.delivery);
+        if (!delivery) {
+            throw "delivery not found";
+        };
+        const { orderCreationId,
+            razorpayPaymentId,
+            razorpayOrderId,
+            razorpaySignature, } = req.body;
+        if (!orderCreationId || !razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
+            throw "info missing"
+        };
+        let shasum = crypto.createHmac("sha256", process.env.RZP_KEY_SECRET);
+        shasum.update(`${orderCreationId}|${razorpayPaymentId}`)
+        let digest = shasum.digest("hex");
+        if (digest !== razorpaySignature) {
+            throw "payment not legit"
+        };
+        delivery.paid = true;
+        order.paid = true;
+        order.paidAt = moment(new Date(), "DD/MM/YYYY").format("DD/MM/YYYY");
+        await delivery.save();
+        await order.save();
+        res.status(200).json({
+            success: true
+        });
+        return
+    } catch (error) {
+        if (error === "order not found" || "delivery not found") {
+            res.status(404).json({
+                success: false,
+                error: error.errors?.[0]?.message || error
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                error: error.errors?.[0]?.message || error
+            });
+        };
+    };
+};
+
 export {
     createMedications,
-    deleteMedication,
-    changeDosage,
-    getOrders
+    getOrders,
+    createRazorpayOrder,
+    verifyPayment
 }

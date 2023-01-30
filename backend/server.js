@@ -9,6 +9,7 @@ import chemistRouter from "./routes/chemist.routes.js";
 import deliveryRouter from "./routes/delivery.routes.js";
 import patientRouter from "./routes/patient.routes.js";
 import storeRouter from "./routes/store.routes.js"
+import drugRouter from "./routes/drugs.routes.js";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use("/api/chemist", chemistRouter);
 app.use("/api/delivery", deliveryRouter);
 app.use("/api/patient", patientRouter);
 app.use("/api/store", storeRouter);
+app.use("/api/drug", drugRouter);
 
 app.use(errorHandler)
 app.listen(port, () => console.log(`listening on port: ${port}`));

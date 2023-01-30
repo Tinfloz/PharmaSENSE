@@ -202,7 +202,8 @@ const createOrder = async (req, res) => {
             patient: patient._id,
             total,
             tax,
-            delivery: delivery._id
+            delivery: delivery._id,
+            subTotal: (total + tax)
         });
         res.status(200).json({
             success: true

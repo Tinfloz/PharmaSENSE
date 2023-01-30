@@ -18,7 +18,8 @@ const orderSchema = new mongoose.Schema({
         required: true
     },
     tax: {
-        type: Number
+        type: Number,
+        required: true
     },
     paid: {
         type: Boolean,
@@ -26,6 +27,10 @@ const orderSchema = new mongoose.Schema({
     },
     paidAt: {
         type: String,
+    },
+    subTotal: {
+        type: Number,
+        required: true
     },
     rzpOrderId: {
         type: String
