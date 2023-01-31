@@ -14,7 +14,6 @@ const patientSchema = new mongoose.Schema({
         coordinates: {
             type: [Number],
             default: undefined,
-            required: true
         },
     },
     drugs: [

@@ -35,13 +35,8 @@ const register = async (req, res) => {
         });
         return
     } catch (error) {
-        if (error === "invalid inputs") {
+        if (error === "invalid inputs" || "user already exists") {
             res.status(400).json({
-                success: false,
-                error: error.errors?.[0]?.message || error
-            });
-        } else if (error === "user already exists") {
-            res.status(404).json({
                 success: false,
                 error: error.errors?.[0]?.message || error
             });

@@ -1,38 +1,29 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import {
   ChakraProvider,
   Box,
   Text,
-  Link,
-  VStack,
-  Code,
-  Grid,
   theme,
 } from '@chakra-ui/react';
 import { ColorModeSwitcher } from './ColorModeSwitcher';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+const LoginPatient = lazy(() => import('./pages/LoginPatient'));
+const LoginChemist = lazy(() => import("./pages/LoginChemist"));
+const RegisterPatient = lazy(() => import('./pages/RegisterPatient'));
+const RegisterChemist = lazy(() => import("./pages/RegisterChemist"));
 
 function App() {
   return (
     <ChakraProvider theme={theme}>
       <Box textAlign="center" fontSize="xl">
-        <Grid minH="100vh" p={3}>
-          <ColorModeSwitcher justifySelf="flex-end" />
-          <VStack spacing={8}>
-            <Logo h="40vmin" pointerEvents="none" />
-            <Text>
-              Edit <Code fontSize="xl">src/App.js</Code> and save to reload.
-            </Text>
-            <Link
-              color="teal.500"
-              href="https://chakra-ui.com"
-              fontSize="2xl"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn Chakra
-            </Link>
-          </VStack>
-        </Grid>
+        <Router>
+          <Routes>
+            <Route path="/login/patient" element={<LoginPatient />} />
+            <Route path="/login/chemist" element={<LoginChemist />} />
+            <Route path="/register/patient" element={<RegisterPatient />} />
+            <Route path="/register/chemist" element={<RegisterChemist />} />
+          </Routes>
+        </Router>
       </Box>
     </ChakraProvider>
   );

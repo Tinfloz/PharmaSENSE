@@ -21,12 +21,6 @@ const storeSchema = new mongoose.Schema({
             required: true
         },
     },
-    acceptRequests: [
-        {
-            type: mongoose.Types.ObjectId,
-            ref: "Deliveries"
-        }
-    ],
 }, { timestamps: true });
 
 const Stores = mongoose.model("Stores", storeSchema);

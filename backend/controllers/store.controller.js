@@ -13,9 +13,7 @@ const acceptRequest = async (req, res) => {
         const store = await Stores.findById(storeId);
         const delivery = await Deliveries.findById(deliveryId);
         delivery.claimed = store._id;
-        store.acceptRequests.push(delivery._id);
         await delivery.save();
-        await store.save();
         res.status(200).json({
             success: true
         });
@@ -28,6 +26,36 @@ const acceptRequest = async (req, res) => {
     };
 };
 
+// get accepted deliveries
+const getStoreDeliveries = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const store = await Stores.findById(id);
+        if (!store) {
+            throw "store not found";
+        };
+        const deliveries = await Deliveries.find({ claimed: store._id });
+        res.status(200).json({
+            success: true,
+            deliveries
+        });
+        return
+    } catch (error) {
+        if (error === "store not found") {
+            res.status(400).json({
+                success: false,
+                error: error.errors?.[0]?.message || error
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                error: error.errors?.[0]?.message || error
+            });
+        };
+    };
+};
+
 export {
-    acceptRequest
+    acceptRequest,
+    getStoreDeliveries
 }
