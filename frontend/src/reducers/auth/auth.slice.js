@@ -33,6 +33,18 @@ export const loginUser = createAsyncThunk("login/user", async (creds, thunkAPI) 
     };
 });
 
+// set address
+export const setAddressLoginUser = createAsyncThunk("set/address", async (addressDetails, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().user.user.token;
+        return await userService.setAddressUser(addressDetails, token);
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.data.message)
+            || error.message || error.toString();
+        return thunkAPI.rejectWithValue(message)
+    };
+});
+
 const authSlice = createSlice({
     name: "auth",
     initialState,
@@ -69,6 +81,27 @@ const authSlice = createSlice({
             .addCase(loginUser.rejected, (state, action) => {
                 state.isLoading = false;
                 state.isError = true;
+                state.message = action.payload;
+            })
+            .addCase(setAddressLoginUser.pending, state => {
+                state.isLoading = true;
+            })
+            .addCase(setAddressLoginUser.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isSuccess = true;
+                const newLoginUser = {
+                    ...state.user.loginUser,
+                    address: action.payload.address
+                };
+                const newUser = {
+                    ...state.user,
+                    loginUser: newLoginUser
+                };
+                state.user = newUser;
+            })
+            .addCase(setAddressLoginUser.rejected, (state, action) => {
+                state.isError = true;
+                state.isLoading = false;
                 state.message = action.payload;
             })
     }

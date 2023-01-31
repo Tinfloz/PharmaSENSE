@@ -27,6 +27,7 @@ const register = async (req, res) => {
         const sendUser = {
             name,
             token: getToken(user._id),
+            userType,
             loginUser
         };
         res.status(200).json({
@@ -64,6 +65,7 @@ const login = async (req, res) => {
         const sendUser = {
             name: user.name,
             token: getToken(user._id),
+            userType: user.userType,
             loginUser
         };
         res.status(200).json({
@@ -95,25 +97,26 @@ const login = async (req, res) => {
 const setAddress = async (req, res) => {
     try {
         const patient = await Patients.findOne({ userId: req.user._id });
-        const { address, longitude, latitude } = req.body;
-        if (!address || !longitude || !latitude) {
+        const { address, addressTwo, state, city, pincode, longitude, latitude } = req.body;
+        if (!address || !longitude || !latitude || !state || !city || !pincode) {
             throw "fields missing";
         };
-        patient.address = address;
+        console.log(longitude, latitude)
+        patient.address = addressTwo.length > 0 ? `${address}, ${addressTwo}, ${state}, ${city}, ${pincode}` :
+            `${address}, ${state}, ${city}, ${pincode}`;
         let location = {
-            type: {
-                type: "Point",
-                coordinates: [longitude, latitude],
-            }
+            type: "Point",
+            coordinates: [longitude, latitude],
         };
         patient.location = location;
         await patient.save();
         res.status(200).json({
             success: true,
-            address
+            address: patient.address
         });
         return
     } catch (error) {
+        console.log(error)
         if (error === "fields missing") {
             res.status(400).json({
                 success: false,

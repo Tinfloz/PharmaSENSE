@@ -18,9 +18,30 @@ const login = async (creds) => {
     return response.data;
 };
 
+const setAddressUser = async (addressDetails, token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    };
+    const response = await axios.post(API_URL + "/set/address", addressDetails, config);
+    const user = JSON.parse(localStorage.getItem("user"));
+    const newLoginUser = {
+        ...user.loginUser,
+        "address": response.data.address
+    };
+    const newUser = {
+        ...user,
+        "loginUser": newLoginUser
+    };
+    localStorage.setItem("user", JSON.stringify(newUser));
+    return response.data;
+}
+
 const userService = {
     register,
-    login
+    login,
+    setAddressUser
 };
 
 export default userService;
