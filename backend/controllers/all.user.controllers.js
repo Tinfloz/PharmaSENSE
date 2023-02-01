@@ -3,6 +3,7 @@ import Users from "../models/all.user.model.js";
 import Chemists from "../models/chemist.model.js";
 import Patients from "../models/patient.model.js";
 import { getToken } from "../utils/get.token.js";
+import axios from "axios";
 
 const register = async (req, res) => {
     try {
@@ -131,8 +132,35 @@ const setAddress = async (req, res) => {
     };
 };
 
+const getReverseGeoCodeFn = async (lat, lng) => {
+    const URL = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&sensor=true&key=${process.env.GMAPSKEY}`;
+    const response = await axios(URL).then(async (response) => response.data);
+    const addressComponents = response.results[0].address_components;
+    const address = `${addressComponents[2].short_name}, ${addressComponents[4].short_name}`;
+    return address;
+}
+
+// reverse geocode
+const reverseGeocodeFn = async (req, res) => {
+    try {
+        const { latitude, longitude } = req.query;
+        console.log(latitude, longitude);
+        const address = await getReverseGeoCodeFn(latitude, longitude);
+        console.log("address", address)
+        res.status(200).json({ address });
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success: false,
+            error: error.errors?.[0]?.message || error
+        });
+    };
+};
+
+
 export {
     register,
     login,
-    setAddress
+    setAddress,
+    reverseGeocodeFn
 }

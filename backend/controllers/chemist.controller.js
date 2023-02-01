@@ -9,7 +9,8 @@ import Stores from "../models/store.model.js";
 const createStore = async (req, res) => {
     try {
         const { name, address, longitude, latitude } = req.body;
-        if (!name || !address || !city || !state || !pincode) {
+        console.log(req.body);
+        if (!name || !address) {
             throw "fields missing";
         };
         const chemist = await Chemists.findOne({ userId: req.user._id });

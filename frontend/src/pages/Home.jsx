@@ -32,7 +32,7 @@ const Home = () => {
                             <VStack>
                                 <HomeCard src={pharmacies} text={"My stores"} nav={"#"} />
                                 <HomeCard src={details} text={"My details"} nav={"#"} />
-                                <HomeCard src={createMedicine} text={"Create new store"} nav={"#"} />
+                                <HomeCard src={createMedicine} text={"Create new store"} nav={"/create/pharmacy"} />
                             </VStack>
                         </>
                     )

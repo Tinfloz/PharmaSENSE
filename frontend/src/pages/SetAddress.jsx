@@ -2,6 +2,7 @@ import { Box, Flex, VStack, Text, Input, Button, useToast } from '@chakra-ui/rea
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetAuthHelpers, setAddressLoginUser } from '../reducers/auth/auth.slice';
+import { getLatLng } from '../helpers/get.lat.lng';
 
 const SetAddress = () => {
 
@@ -19,12 +20,6 @@ const SetAddress = () => {
 
     const dispatch = useDispatch();
     const toast = useToast();
-
-    const getLatLng = () => {
-        return new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject);
-        });
-    };
 
     useEffect(() => {
         (async () => {
