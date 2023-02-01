@@ -19,7 +19,7 @@ const Home = () => {
                 alignItems="center"
             >
                 {
-                    userType === "Chemist" ? (
+                    userType === "Patient" ? (
                         <>
                             <VStack>
                                 <HomeCard src={medicine} text={"My medicines"} nav={"#"} />
@@ -30,7 +30,7 @@ const Home = () => {
                     ) : (
                         <>
                             <VStack>
-                                <HomeCard src={pharmacies} text={"My stores"} nav={"#"} />
+                                <HomeCard src={pharmacies} text={"My stores"} nav={"/my/stores"} />
                                 <HomeCard src={details} text={"My details"} nav={"#"} />
                                 <HomeCard src={createMedicine} text={"Create new store"} nav={"/create/pharmacy"} />
                             </VStack>

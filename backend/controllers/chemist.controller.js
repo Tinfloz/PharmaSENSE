@@ -225,10 +225,30 @@ const createOrder = async (req, res) => {
     };
 };
 
+// get stores
+const getStoresByChemistId = async (req, res) => {
+    try {
+        const chemist = await Chemists.findOne({
+            userId: req.user._id
+        });
+        const stores = await Stores.find({ owner: chemist._id });
+        res.status(200).json({
+            stores
+        });
+        return
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.errors?.[0]?.message || error
+        });
+    };
+};
+
 export {
     createStore,
     deleteStore,
     changeAddress,
     changeStoreName,
-    createOrder
+    createOrder,
+    getStoresByChemistId
 }

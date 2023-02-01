@@ -20,6 +20,17 @@ export const createStoreLoginChemist = createAsyncThunk("create/store", async (s
     };
 });
 
+export const getAllLoginChemistStores = createAsyncThunk("stores/get", async (_, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().user.user.token;
+        return await chemistService.getAllMyStores(token);
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.data.message)
+            || error.message || error.toString();
+        return thunkAPI.rejectWithValue(message)
+    };
+});
+
 const chemistSlice = createSlice({
     name: "chemist",
     initialState,
@@ -40,6 +51,19 @@ const chemistSlice = createSlice({
                 state.isSuccess = true;
             })
             .addCase(createStoreLoginChemist.rejected, (state, action) => {
+                state.isLoading = false;
+                state.isError = true;
+                state.message = action.payload;
+            })
+            .addCase(getAllLoginChemistStores.pending, state => {
+                state.isLoading = true;
+            })
+            .addCase(getAllLoginChemistStores.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isSuccess = true;
+                state.store = action.payload.stores;
+            })
+            .addCase(getAllLoginChemistStores.rejected, (state, action) => {
                 state.isLoading = false;
                 state.isError = true;
                 state.message = action.payload;

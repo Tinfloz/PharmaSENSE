@@ -12,8 +12,19 @@ const createStoreChemist = async (storeDetails, token) => {
     return response.data;
 };
 
+const getAllMyStores = async (token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    };
+    const response = await axios.get(API_URL + `/get/stores`, config);
+    return response.data;
+};
+
 const chemistService = {
-    createStoreChemist
+    createStoreChemist,
+    getAllMyStores
 };
 
 export default chemistService;
