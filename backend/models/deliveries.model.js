@@ -28,6 +28,8 @@ const deliverySchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+deliverySchema.index({ "location": "2dsphere" });
+
 const Deliveries = mongoose.model("Deliveries", deliverySchema);
 
 export default Deliveries;

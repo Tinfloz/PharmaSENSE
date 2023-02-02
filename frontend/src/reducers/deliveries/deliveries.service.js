@@ -12,8 +12,19 @@ const getNearbyStoreDeliveries = async (id, token) => {
     return response.data;
 };
 
+const getSelectedDelivery = async (id, token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    };
+    const response = await axios.get(API_URL + `/get/delivery/${id}`, config);
+    return response.data;
+};
+
 const deliveryService = {
-    getNearbyStoreDeliveries
+    getNearbyStoreDeliveries,
+    getSelectedDelivery
 };
 
 export default deliveryService;

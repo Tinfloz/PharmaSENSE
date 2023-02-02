@@ -100,7 +100,9 @@ const StoreCard = ({ store }) => {
                                 alignItems="center"
                             >
                                 <ButtonGroup spacing="5vh">
-                                    <Button>
+                                    <Button
+                                        onClick={() => navigate(`/nearby/deliveries/${store._id}`)}
+                                    >
                                         Get Nearby Deliveries
                                     </Button>
                                     <Button

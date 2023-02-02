@@ -21,6 +21,17 @@ export const getMyStoreDeliveries = createAsyncThunk("deliveries/nearby", async 
     };
 });
 
+export const getMyDeliveryById = createAsyncThunk("delivery/id", async (id, thunkAPI) => {
+    try {
+        const token = thunkAPI.getState().user.user.token;
+        return await deliveryService.getSelectedDelivery(id, token);
+    } catch (error) {
+        const message = (error.response && error.response.data && error.response.data.message)
+            || error.message || error.toString();
+        return thunkAPI.rejectWithValue(message)
+    };
+});
+
 const deliverySlice = createSlice({
     name: "deliveries",
     initialState,
@@ -45,6 +56,19 @@ const deliverySlice = createSlice({
                 state.isLoading = false;
                 state.isError = true;
                 state.message = action.payload.deliveries
+            })
+            .addCase(getMyDeliveryById.pending, state => {
+                state.isLoading = true;
+            })
+            .addCase(getMyDeliveryById.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.isSuccess = true;
+                state.deliveries = action.payload.delivery
+            })
+            .addCase(getMyDeliveryById.rejected, (state, action) => {
+                state.isLoading = false;
+                state.isError = true;
+                state.message = action.payload;
             })
     }
 });
