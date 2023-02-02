@@ -54,7 +54,7 @@ const deleteStore = async (req, res) => {
             throw "store not found"
         };
         const chemist = await Chemists.findOne({ userId: req.user._id });
-        if (store.owner.toString() !== chemist._id.toString) {
+        if (store.owner.toString() !== chemist._id.toString()) {
             throw "not authorised";
         };
         for (let element of chemist.stores) {
@@ -165,8 +165,9 @@ const changeAddress = async (req, res) => {
         store.address = address || store.address;
         store.location = location;
         await store.save();
-        res.status(400).json({
-            success: true
+        res.status(200).json({
+            success: true,
+            address, latitude, longitude, id
         });
         return
     } catch (error) {

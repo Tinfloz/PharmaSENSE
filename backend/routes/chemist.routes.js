@@ -5,7 +5,7 @@ import { isChemist, protect } from "../middlewares/auth.middleware.js";
 let router = express.Router();
 
 router.route("/create/store").post(protect, isChemist, createStore);
-router.route("/delete/store/:id").delete(protect, isChemist, deleteStore);
+router.route("/delete/store/:id").get(protect, isChemist, deleteStore);
 router.route("/change/name/:id").post(protect, isChemist, changeStoreName);
 router.route("/change/address/:id").post(protect, isChemist, changeAddress);
 router.route("/create/order").post(protect, isChemist, createOrder);

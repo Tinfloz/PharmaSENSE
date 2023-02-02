@@ -22,9 +22,42 @@ const getAllMyStores = async (token) => {
     return response.data;
 };
 
+const deleteMyStore = async (token, id) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    };
+    const response = await axios.get(API_URL + `/delete/store/${id}`, config);
+    return response.data;
+};
+
+const changeStoreName = async (token, name, id) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    };
+    const response = await axios.post(API_URL + `/change/name/${id}`, name, config);
+    return response.data;
+};
+
+const setStoreAddress = async (id, addressDetails, token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    };
+    const response = await axios.post(API_URL + `/change/address/${id}`, addressDetails, config);
+    return response.data;
+}
+
 const chemistService = {
     createStoreChemist,
-    getAllMyStores
+    getAllMyStores,
+    deleteMyStore,
+    changeStoreName,
+    setStoreAddress
 };
 
 export default chemistService;

@@ -2,18 +2,57 @@ import React, { useEffect, useState } from 'react';
 import {
     Box, Button, ButtonGroup, Flex, Spinner, Text,
     useDisclosure, Modal, ModalHeader, ModalBody, ModalOverlay,
-    ModalCloseButton, ModalContent, ModalFooter
+    ModalCloseButton, ModalContent, ModalFooter, useToast
 } from "@chakra-ui/react";
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
-import { getLatLng } from '../helpers/get.lat.lng';
+import { useSelector, useDispatch } from 'react-redux';
+import { deleteLoginChemistStore, resetChemistHelpers } from '../reducers/chemist/chemist.slice';
+import { useNavigate } from 'react-router-dom';
 
 const StoreCard = ({ store }) => {
 
     const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY
+        googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+        libraries: ['places'],
+        id: 'google-map-script',
     });
+    const navigate = useNavigate();
+    const [deleted, setDeleted] = useState(false)
 
+    const { isSuccess, isError } = useSelector(state => state.chemist);
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const dispatch = useDispatch();
+    const toast = useToast();
+    const onClick = async () => {
+        await dispatch(deleteLoginChemistStore(store._id));
+        onClose();
+    };
+
+    useEffect(() => {
+        if (!isSuccess && !isError) {
+            return
+        };
+        if (isSuccess && deleted) {
+            toast({
+                position: "bottom-left",
+                title: "Success",
+                description: "Successfully deleted!",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+        } else if (isError && deleted) {
+            toast({
+                position: "bottom-left",
+                title: "Error",
+                description: "Could not be deleted!",
+                status: "warning",
+                duration: 5000,
+                isClosable: true,
+            });
+        };
+        dispatch(resetChemistHelpers());
+    }, [isSuccess, isError, toast, dispatch])
 
     return (
         <>
@@ -64,7 +103,9 @@ const StoreCard = ({ store }) => {
                                     <Button>
                                         Get Nearby Deliveries
                                     </Button>
-                                    <Button>
+                                    <Button
+                                        onClick={() => navigate("/store/details", { state: store })}
+                                    >
                                         Change Store Details
                                     </Button>
                                     <Button
@@ -87,7 +128,11 @@ const StoreCard = ({ store }) => {
                                                 <Button colorScheme='blue' mr={3} onClick={onClose}>
                                                     Close
                                                 </Button>
-                                                <Button variant='ghost'>Delete</Button>
+                                                <Button variant='ghost'
+                                                    onClick={onClick}
+                                                >
+                                                    Delete
+                                                </Button>
                                             </ModalFooter>
                                         </ModalContent>
                                     </Modal>

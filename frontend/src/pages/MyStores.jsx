@@ -1,8 +1,8 @@
-import { Flex, Spinner } from '@chakra-ui/react'
+import { Flex, Spinner, Text } from '@chakra-ui/react'
 import React, { useEffect } from 'react'
 import StoreCard from '../components/StoreCard';
 import { useSelector, useDispatch } from 'react-redux';
-import { getAllLoginChemistStores } from '../reducers/chemist/chemist.slice';
+import { getAllLoginChemistStores, resetChemist, resetChemistHelpers } from '../reducers/chemist/chemist.slice';
 
 const MyStores = () => {
 
@@ -12,6 +12,7 @@ const MyStores = () => {
     useEffect(() => {
         (async () => {
             await dispatch(getAllLoginChemistStores());
+            dispatch(resetChemistHelpers());
         })()
     }, [])
 
@@ -36,9 +37,25 @@ const MyStores = () => {
                     ) : (
                         <>
                             {
-                                store?.map(el => (
-                                    <StoreCard store={el} />
-                                ))
+                                store.length === 0 ? (
+                                    <>
+                                        <Text
+                                            as="b"
+                                            color="gray.300"
+                                            fontSize="5vh"
+                                        >
+                                            There are no stores to display!
+                                        </Text>
+                                    </>
+                                ) : (
+                                    <>
+                                        {
+                                            store?.map(el => (
+                                                <StoreCard store={el} />
+                                            ))
+                                        }
+                                    </>
+                                )
                             }
                         </>
                     )

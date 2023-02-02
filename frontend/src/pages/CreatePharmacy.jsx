@@ -26,6 +26,7 @@ const CreatePharmacy = () => {
     const { isLoaded } = useJsApiLoader({
         googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
         libraries: ['places'],
+        id: 'google-map-script',
     });
 
     useEffect(() => {
@@ -142,7 +143,6 @@ const CreatePharmacy = () => {
                                     apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
                                     style={{ width: '40vh', height: "5vh", borderWidth: "1px", borderColor: "gray.300", padding: "2vh", borderRadius: "1vh" }}
                                     onPlaceSelected={place => {
-                                        console.log(place)
                                         setCenter(prevState => ({
                                             ...prevState,
                                             lat: place?.geometry?.location?.lat(),

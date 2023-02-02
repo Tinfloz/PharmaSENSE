@@ -18,6 +18,7 @@ const Home = lazy(() => import("./pages/Home"));
 const SetAddress = lazy(() => import("./pages/SetAddress"));
 const CreatePharmacy = lazy(() => import("./pages/CreatePharmacy"));
 const MyStores = lazy(() => import("./pages/MyStores"));
+const StoreDetailsPage = lazy(() => import("./pages/StoreDetailsPage"));
 
 function App() {
 
@@ -38,6 +39,7 @@ function App() {
               <Route path='/set/address' element={<SetAddress />} />
               <Route path="/create/pharmacy" element={<CreatePharmacy />} />
               <Route path="/my/stores" element={<MyStores />} />
+              <Route path="/store/details" element={<StoreDetailsPage />} />
             </Routes>
           </Router>
         </Suspense>
