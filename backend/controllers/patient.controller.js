@@ -9,6 +9,7 @@ import razorpay from "razorpay";
 import shortid from "shortid";
 import Deliveries from "../models/deliveries.model.js";
 import moment from "moment";
+import nodeCron from "node-cron";
 
 // create drugs 
 const createMedications = async (req, res) => {
@@ -20,7 +21,7 @@ const createMedications = async (req, res) => {
         const patient = await Patients.findOne({ userId: req.user._id });
         const drug = await Drugs.create({
             patient: patient._id,
-            name,
+            drug: name,
             dosage,
             volume,
             slots,
@@ -39,6 +40,7 @@ const createMedications = async (req, res) => {
         });
         return
     } catch (error) {
+        console.log(error)
         if (error === "fields missing") {
             res.status(400).json({
                 success: false,
@@ -171,6 +173,12 @@ const verifyPayment = async (req, res) => {
         };
     };
 };
+
+// TODO: cron to set reminders
+nodeCron("0 * * * *", async () => {
+    const time = moment(new Date());
+    console.log(time);
+})
 
 export {
     createMedications,

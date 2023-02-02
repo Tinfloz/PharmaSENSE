@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import Deliveries from "./deliveries.model.js";
+import { setDaysTimeout } from "../utils/set.days.timeout.js";
+import lt from "long-timeout";
 
 const drugSchema = new mongoose.Schema({
     patient: {
@@ -38,27 +40,23 @@ const drugSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-// pre hook
-drugSchema.pre("save", function () {
-    this.populate({
-        path: "patient",
-        select: "userId _id latitude longitude",
-        populate: {
-            path: "userId",
-            select: "_id email"
-        }
-    });
-    return next();
-})
 
 // post hook
 drugSchema.post("save", function () {
-    setTimeout(async () => {
+    lt.setTimeout(async () => {
+        await this.populate({
+            path: "patient",
+            select: "userId _id location",
+            populate: {
+                path: "userId",
+                select: "_id email"
+            }
+        })
         await Deliveries.create({
             patient: this.patient._id,
             location: {
                 type: "Point",
-                coordinates: [this.patient.longitude, this.patient.latitude]
+                coordinates: [this.patient.location.coordinates[0], this.patient.location.coordinates[1]]
             },
             drug: this._id,
         })
