@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Fallback from './components/Fallback';
 import NavBar from './components/NavBar';
 import { useSelector } from 'react-redux';
+import Test from './pages/Test';
 const LoginPatient = lazy(() => import('./pages/LoginPatient'));
 const LoginChemist = lazy(() => import("./pages/LoginChemist"));
 const RegisterPatient = lazy(() => import('./pages/RegisterPatient'));
@@ -44,6 +45,7 @@ function App() {
               <Route path="/store/details" element={<StoreDetailsPage />} />
               <Route path="/nearby/deliveries/:id" element={<NearbyDeliveries />} />
               <Route path="/create/medicine" element={<CreateNewMedicine />} />
+              <Route path="/test" element={<Test />} />
             </Routes>
           </Router>
         </Suspense>

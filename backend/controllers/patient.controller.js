@@ -174,11 +174,6 @@ const verifyPayment = async (req, res) => {
     };
 };
 
-// TODO: cron to set reminders
-nodeCron("0 * * * *", async () => {
-    const time = moment(new Date());
-    console.log(time);
-})
 
 export {
     createMedications,
