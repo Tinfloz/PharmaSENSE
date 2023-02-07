@@ -17,14 +17,19 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "jimp": "^0.22.1",
     "jsonwebtoken": "^9.0.0",
+    "jsqr": "^1.4.0",
     "long-timeout": "^0.1.1",
     "moment": "^2.29.4",
     "mongoose": "^6.9.0",
     "node-cron": "^3.0.2",
     "node-geocoder": "^4.2.0",
     "nodemon": "^2.0.20",
+    "puppeteer": "^19.6.3",
+    "qrcode-reader": "^1.0.4",
     "razorpay": "^2.8.4",
-    "shortid": "^2.2.16"
+    "shortid": "^2.2.16",
+    "tesseract.js": "^2.1.1"
   }
 }

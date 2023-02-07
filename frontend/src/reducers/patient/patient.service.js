@@ -12,8 +12,19 @@ const addNewMed = async (medDetails, token) => {
     return response.data;
 };
 
+const addNewMedByPhoto = async (medDetails, token) => {
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    };
+    const response = await axios.post(API_URL + "/create/meds/photo", medDetails, config);
+    return response.data;
+}
+
 const patientService = {
-    addNewMed
+    addNewMed,
+    addNewMedByPhoto
 };
 
 export default patientService;

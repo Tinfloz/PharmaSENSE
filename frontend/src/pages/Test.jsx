@@ -12,6 +12,9 @@ const Test = () => {
                     borderWidth="1px"
                     borderColor="red.300"
                 >
+                    <Text>
+                        hello
+                    </Text>
                 </Flex>
             </Box>
         </>

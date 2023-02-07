@@ -9,7 +9,10 @@ import razorpay from "razorpay";
 import shortid from "shortid";
 import Deliveries from "../models/deliveries.model.js";
 import moment from "moment";
-import nodeCron from "node-cron";
+import puppeteer from "puppeteer";
+import jimp from "jimp";
+import jsqr from "jsqr";
+import tesseract from "tesseract.js";
 
 // create drugs 
 const createMedications = async (req, res) => {
@@ -174,10 +177,63 @@ const verifyPayment = async (req, res) => {
     };
 };
 
+const createByScanning = async (req, res) => {
+    try {
+        const { name, volume, dosage, slots } = req.body;
+        if (!name || !volume || !dosage || !slots) {
+            throw "empty fields";
+        };
+        const patient = await Patients.findOne({
+            userId: req.user._id
+        });
+        const nameBuffer = Buffer.from(name.split(",")[1], "base64");
+        // const volumeBuffer = Buffer.from(volume.split(",")[1], "base64");
+        const image = await jimp.read(nameBuffer);
+        const qrCodeImageArray = new Uint8ClampedArray(image.bitmap.data.buffer);
+        const code = jsqr(
+            qrCodeImageArray,
+            image.bitmap.width,
+            image.bitmap.height
+        );
+        const toPage = code.data;
+        let screenshot = await (async () => {
+            const browser = await puppeteer.launch({
+                defaultViewport: {
+                    width: 1280,
+                    height: 600,
+                },
+            });
+            const page = await browser.newPage();
+            await page.goto(toPage);
+            let screenshot = `data:image/png;base64,${await page.screenshot({ encoding: "base64" })}`;
+            return screenshot;
+        })()
+        console.log(screenshot);
+        const bufferImage = Buffer.from(screenshot.split(",")[1], "base64");
+        const data = await tesseract.recognize(bufferImage, "eng");
+        const dataArray = data.data.text.split(" ");
+        for (let i of dataArray) {
+
+        }
+    } catch (error) {
+        if (error === "empty fields") {
+            res.status(400).json({
+                success: false,
+                error: error.errors?.[0]?.message || error
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                error: error.errors?.[0]?.message || error
+            });
+        }
+    }
+}
 
 export {
     createMedications,
     getOrders,
     createRazorpayOrder,
-    verifyPayment
+    verifyPayment,
+    createByScanning
 }

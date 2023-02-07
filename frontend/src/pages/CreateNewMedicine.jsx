@@ -5,13 +5,14 @@ import {
 } from '@chakra-ui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from "moment";
-import { createMedLoginUser, resetPatientHelpers } from '../reducers/patient/patient.slice';
+import { createMedLoginUser, createMedPhotoLoginUser, resetPatientHelpers } from '../reducers/patient/patient.slice';
 import SpeechRecognition from 'react-speech-recognition';
 import CreateMedBySpeech from '../components/CreateMedBySpeech';
 import dosage from "../assets/dosage";
 import name from "../assets/name";
 import volume from "../assets/volume";
 import GetSlotsBySpeech from '../components/GetSlotsBySpeech';
+import CreateMedByPhoto from '../components/CreateMedByPhoto';
 
 const getSlots = () => {
     const start = moment("00:00", "HH:mm");
@@ -41,6 +42,9 @@ const CreateNewMedicine = () => {
                     </TabPanel>
                     <TabPanel>
                         <CreateManually />
+                    </TabPanel>
+                    <TabPanel>
+                        <CreateByPhoto />
                     </TabPanel>
                 </TabPanels>
             </Tabs>
@@ -384,6 +388,200 @@ const CreateBySpeech = () => {
                                         <Button
                                             onClick={async () => {
                                                 await dispatch(createMedLoginUser(med));
+                                                dispatch(resetPatientHelpers());
+                                            }}
+                                        >
+                                            Submit
+                                        </Button>
+                                    </Stack>
+                                </Flex>
+                            </Box>
+                        </Flex>
+                    </TabPanel>
+                </TabPanels>
+            </Tabs>
+        </>
+    )
+}
+
+const CreateByPhoto = () => {
+
+    const [med, setMed] = useState({
+        name: null,
+        dosage: null,
+        volume: null,
+        slots: null
+    });
+    const dispatch = useDispatch();
+
+    const onNameClick = useCallback((name) => {
+        setMed(prevState => ({
+            ...prevState,
+            name
+        }))
+    }, [])
+
+    const onDosageClick = useCallback(dosage => {
+        setMed(prevState => ({
+            ...prevState,
+            dosage
+        }))
+    }, [])
+
+    const onVolumeClick = useCallback(volume => {
+        setMed(prevState => ({
+            ...prevState,
+            volume
+        }))
+    }, [])
+
+    const onSlotsClick = useCallback(slots => {
+        setMed(prevState => ({
+            ...prevState,
+            slots
+        }))
+    }, [])
+
+    return (
+        <>
+            <Tabs variant='soft-rounded' colorScheme='purple' p="1vh" isLazy>
+                <TabList>
+                    <Tab>
+                        Set Volume
+                    </Tab>
+                    <Tab>
+                        Set Dosage
+                    </Tab>
+                    <Tab>
+                        Set Name
+                    </Tab>
+                    <Tab>
+                        Set Slots
+                    </Tab>
+                    {
+                        !(med.name && med.volume && med.dosage && med.slots) ? (null) : (
+                            <>
+                                <Tab>
+                                    Confirm
+                                </Tab>
+                            </>
+                        )
+                    }
+                </TabList>
+                <TabPanels>
+                    <TabPanel>
+                        <Flex
+                            borderWidth="1px"
+                            borderColor="red.100"
+                            h="75vh"
+                            justify="center"
+                            alignItems="center"
+                        >
+                            <CreateMedByPhoto
+                                text={"Take a picture of the back side of your medicine bottle. Take a clear picture for best results"}
+                                onClick={onVolumeClick}
+                            />
+                        </Flex>
+                    </TabPanel>
+                    <TabPanel>
+                        <Flex
+                            borderWidth="1px"
+                            borderColor="red.100"
+                            h="65vh"
+                            justify="center"
+                            alignItems="center"
+                        >
+                            <CreateMedBySpeech
+                                text={dosage}
+                                type={"Dosage"}
+                                onClick={onDosageClick}
+                            />
+                        </Flex>
+                    </TabPanel>
+                    <TabPanel>
+                        <Flex
+                            borderWidth="1px"
+                            borderColor="red.100"
+                            h="75vh"
+                            justify="center"
+                            alignItems="center"
+                        >
+                            <CreateMedByPhoto
+                                text={"Take a picture of the front side of your medicine bottle (the side with the name of the medicine)"}
+                                onClick={onNameClick}
+                            />
+                        </Flex>
+                    </TabPanel>
+                    <TabPanel>
+                        <Flex
+                            borderWidth="1px"
+                            borderColor="red.100"
+                            h="65vh"
+                            justify="center"
+                            alignItems="center"
+                        >
+                            <GetSlotsBySpeech onClick={onSlotsClick} />
+                        </Flex>
+                    </TabPanel>
+                    <TabPanel>
+                        <Flex
+                            borderWidth="1px"
+                            borderColor="red.100"
+                            h="65vh"
+                            justify="center"
+                            alignItems="center"
+                        >
+                            <Box
+                                w="40vw"
+                                h="50vh"
+                                bg="red.100"
+                            >
+                                <Flex
+                                    justify="center"
+                                    alignItems="center"
+                                    p="3vh"
+                                >
+                                    <Heading>
+                                        Confirm Details
+                                    </Heading>
+                                </Flex>
+                                <Flex
+                                    justify="center"
+                                    alignItems="center"
+                                >
+                                    <Stack spacing="3vh">
+                                        {
+                                            Object.entries(med).map(el => (
+                                                <>
+                                                    {
+                                                        el[0] === "name" || el[0] === "volume" ? (null) : (
+                                                            <>
+                                                                <HStack>
+                                                                    <Text
+                                                                        as="b"
+                                                                    >
+                                                                        {el[0]}:
+                                                                    </Text>
+                                                                    <Text>
+                                                                        {(() => {
+                                                                            let text;
+                                                                            if (el[0] === "slots") {
+                                                                                text = el[1]?.join(", ");
+                                                                                return text
+                                                                            };
+                                                                            return el[1]
+                                                                        })()}
+                                                                    </Text>
+                                                                </HStack>
+                                                            </>
+                                                        )
+                                                    }
+                                                </>
+                                            ))
+                                        }
+                                        <Button
+                                            onClick={async () => {
+                                                await dispatch(createMedPhotoLoginUser(med));
                                                 dispatch(resetPatientHelpers());
                                             }}
                                         >
