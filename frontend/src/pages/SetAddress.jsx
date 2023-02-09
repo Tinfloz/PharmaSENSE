@@ -1,124 +1,153 @@
-import { Box, Flex, VStack, Text, Input, Button, useToast } from '@chakra-ui/react'
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { resetAuthHelpers, setAddressLoginUser } from '../reducers/auth/auth.slice';
+import { Box, Flex, Heading, Spinner, Text, Input, VStack, Button } from "@chakra-ui/react";
+import { GoogleMap, Marker, useJsApiLoader, Circle } from '@react-google-maps/api';
 import { getLatLng } from '../helpers/get.lat.lng';
+import { useEffect, useState, useRef } from 'react';
+import { resetAddressHelpers, reverseGeocodeUser } from "../reducers/address/address.slice";
+import { useDispatch, useSelector } from "react-redux";
+import Autocomplete from "react-google-autocomplete";
+import { resetAuthHelpers, setAddressLoginUser } from "../reducers/auth/auth.slice";
 
 const SetAddress = () => {
 
-    const { isSuccess, isError } = useSelector(state => state.user);
-
-    const [address, setAddress] = useState({
-        address: "",
-        addressTwo: "",
-        city: "",
-        state: "",
-        pincode: "",
-        latitude: null,
-        longitude: null
+    const { isLoaded } = useJsApiLoader({
+        googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+        libraries: ["places"],
+        id: 'google-map-script',
     });
 
+    const firstRenderRef = useRef(true);
+
+    const [center, setCenter] = useState({
+        lat: null,
+        lng: null
+    });
+
+    const [addressUser, setAddressUser] = useState({
+        address: null
+    });
+
+    const [addressLineOne, setAddressLineOne] = useState("");
+
+    const { address } = useSelector(state => state.address);
+
     const dispatch = useDispatch();
-    const toast = useToast();
 
     useEffect(() => {
         (async () => {
             const coords = await getLatLng();
-            setAddress(prevState => ({
+            setCenter(prevState => ({
                 ...prevState,
-                latitude: coords.coords.latitude,
-                longitude: coords.coords.longitude
+                lat: coords.coords.latitude,
+                lng: coords.coords.longitude
             }))
+            await dispatch(reverseGeocodeUser({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }));
+            dispatch(resetAddressHelpers());
         })()
     }, [])
 
     useEffect(() => {
-        if (!isSuccess && !isError) {
-            return
+        if (firstRenderRef.current) {
+            firstRenderRef.current = false;
+            return;
         };
-        if (isSuccess) {
-            toast({
-                position: "bottom-left",
-                title: "Success",
-                description: "Address set successfully",
-                status: "success",
-                duration: 5000,
-                isClosable: true,
-            });
-        } else if (isError) {
-            toast({
-                position: "bottom-left",
-                title: "Error",
-                description: "Address could not be set",
-                status: "warning",
-                duration: 5000,
-                isClosable: true,
-            });
-        };
-        dispatch(resetAuthHelpers());
-        setAddress(prevState => ({
-            ...prevState,
-            address: "",
-            addressTwo: "",
-            city: "",
-            state: "",
-            pincode: "",
-            latitude: null,
-            longitude: null
-        }));
-    }, [isSuccess, isError, toast, dispatch])
-
-    const handleChange = (e) => {
-        setAddress(prevState => ({
-            ...prevState,
-            [e.target.name]: e.target.value
-        }));
-    };
+        (async () => {
+            await dispatch(reverseGeocodeUser({ latitude: center.lat, longitude: center.lng }));
+            dispatch(resetAddressHelpers());
+        })()
+    }, [JSON.stringify(addressUser)])
 
     return (
         <>
-            <Flex
-                justify="center"
-                alignItems="center"
-                p="15vh"
-            >
-                <Box
-                    w="35vw"
-                    h="55vh"
-                    borderRadius="1vh"
-                    borderWidth="1px"
-                    borderColor="gray.300"
-                >
-                    <Flex
-                        p="3vh"
-                        justify="center"
-                        alignItems="center"
-                    >
-                        <VStack spacing="2vh">
-                            <Text as="b" fontSize="3.5vh">
-                                Set Address
-                            </Text>
-                            <Input placeholder='address line 1' name="address" value={address.address}
-                                onChange={handleChange} />
-                            <Input placeholder='address line 2 (optional)' name="addressTwo" value={address.addressTwo}
-                                onChange={handleChange} />
-                            <Input placeholder='state' name='state' value={address.state}
-                                onChange={handleChange} />
-                            <Input placeholder='city' name="city" value={address.city}
-                                onChange={handleChange} />
-                            <Input placeholder='pincode' name="pincode" value={address.pincode}
-                                onChange={handleChange} />
-                            <Button
-                                onClick={async () => {
-                                    await dispatch(setAddressLoginUser(address));
-                                }}
+            {
+                !isLoaded ? (
+                    <>
+                        <Flex
+                            justify="center"
+                            alignItems="center"
+                            p="15vh"
+                        >
+                            <Spinner
+                                thickness='4px'
+                                size='xl'
+                                color='blue.500'
+                                emptyColor='gray.400'
+                                speed='0.65s'
+                            />
+                        </Flex>
+                    </>
+                ) : (
+                    <>
+                        <Box
+                            w="100vw"
+                            h="90vh"
+                            bg="blue.100"
+                        >
+                            <GoogleMap
+                                center={center}
+                                zoom={15}
+                                mapContainerStyle={{ width: "100%", height: "85vh" }}
+                                options={{ mapTypeControl: false, zoomControl: false, streetViewControl: false, fullscreenControl: false }}
                             >
-                                Submit
-                            </Button>
-                        </VStack>
-                    </Flex>
-                </Box>
-            </Flex>
+                                <Marker
+                                    position={center}
+                                />
+                            </GoogleMap>
+                            <Box
+                                position="absolute"
+                                bottom="0"
+                                h="40vh"
+                                bg="red.100"
+                                borderTopRadius="20vh"
+                                w="inherit"
+                                p="2vh"
+                            >
+                                <Heading size="lg" p="3vh">
+                                    {address}
+                                </Heading>
+                                <VStack>
+                                    <Input
+                                        placeholder='enter neighnourhood'
+                                        w="40vh"
+                                        bg="white"
+                                        onChange={(e) => setAddressLineOne(e.target.value)}
+                                    />
+                                    <Autocomplete
+                                        apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
+                                        style={{ width: '40vh', height: "5vh", borderWidth: "1px", borderColor: "gray.300", padding: "2vh", borderRadius: "1vh" }}
+                                        onPlaceSelected={place => {
+                                            setCenter(prevState => ({
+                                                ...prevState,
+                                                lat: place?.geometry?.location?.lat(),
+                                                lng: place?.geometry?.location?.lng()
+                                            }));
+                                            setAddressUser(prevState => ({
+                                                ...prevState,
+                                                address: place?.formatted_address
+                                            }));
+                                        }}
+                                        options={{
+                                            types: ["geocode", "establishment"],
+                                        }}
+                                    />
+                                    <Button
+                                        onClick={async () => {
+                                            let addressDetails = {
+                                                address: `${addressLineOne}, ${addressUser.address}`,
+                                                latitude: center.lat,
+                                                longitude: center.lng
+                                            };
+                                            await dispatch(setAddressLoginUser(addressDetails));
+                                            dispatch(resetAuthHelpers());
+                                        }}
+                                    >
+                                        Submit
+                                    </Button>
+                                </VStack>
+                            </Box>
+                        </Box>
+                    </>
+                )
+            }
         </>
     )
 }

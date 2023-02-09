@@ -97,40 +97,32 @@ const login = async (req, res) => {
 // set address
 const setAddress = async (req, res) => {
     try {
-        const patient = await Patients.findOne({ userId: req.user._id });
-        const { address, addressTwo, state, city, pincode, longitude, latitude } = req.body;
-        if (!address || !longitude || !latitude || !state || !city || !pincode) {
-            throw "fields missing";
+        const patient = await Patients.findOne({
+            userId: req.user._id
+        });
+        const { address, latitude, longitude } = req.body;
+        if (!address || !latitude || !longitude) {
+            throw "issing fields";
         };
-        console.log(longitude, latitude)
-        patient.address = addressTwo.length > 0 ? `${address}, ${addressTwo}, ${state}, ${city}, ${pincode}` :
-            `${address}, ${state}, ${city}, ${pincode}`;
-        let location = {
+        const location = {
             type: "Point",
-            coordinates: [longitude, latitude],
+            coordinates: [longitude, latitude]
         };
+        patient.address = address;
         patient.location = location;
         await patient.save();
         res.status(200).json({
             success: true,
-            address: patient.address
+            address
         });
         return
     } catch (error) {
-        console.log(error)
-        if (error === "fields missing") {
-            res.status(400).json({
-                success: false,
-                error: error.errors?.[0]?.message || error
-            });
-        } else {
-            res.status(500).json({
-                success: false,
-                error: error.errors?.[0]?.message || error
-            });
-        };
-    };
-};
+        res.status(500).json({
+            success: false,
+            error: error.errors?.[0]?.message || error
+        });
+    }
+}
 
 const getReverseGeoCodeFn = async (lat, lng) => {
     const URL = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&sensor=true&key=${process.env.GMAPSKEY}`;

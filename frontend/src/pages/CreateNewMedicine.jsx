@@ -153,7 +153,6 @@ const CreateManually = () => {
                                         <Button
                                             isDisabled={timing.includes(el) ? true : false}
                                             onClick={() => {
-                                                console.log(timing.includes(el))
                                                 setTiming(prevState => [...prevState, el])
                                             }}
                                         >

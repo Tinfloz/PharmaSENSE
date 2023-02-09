@@ -8,7 +8,6 @@ const getAddress = async (latitude, longitude, token) => {
             Authorization: `Bearer ${token}`
         }
     };
-    console.log("in service", token)
     const response = await axios.get(API_URL + `?latitude=${latitude}&longitude=${longitude}`, config);
     return response.data;
 };

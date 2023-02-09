@@ -179,16 +179,16 @@ const verifyPayment = async (req, res) => {
 
 const createByScanning = async (req, res) => {
     try {
-        const { name, volume, dosage, slots } = req.body;
-        if (!name || !volume || !dosage || !slots) {
+        const { photo, dosage, slots } = req.body;
+        if (!photo || !volume || !dosage || !slots) {
             throw "empty fields";
         };
         const patient = await Patients.findOne({
             userId: req.user._id
         });
-        const nameBuffer = Buffer.from(name.split(",")[1], "base64");
+        const photoBuffer = Buffer.from(photo.split(",")[1], "base64");
         // const volumeBuffer = Buffer.from(volume.split(",")[1], "base64");
-        const image = await jimp.read(nameBuffer);
+        const image = await jimp.read(photoBuffer);
         const qrCodeImageArray = new Uint8ClampedArray(image.bitmap.data.buffer);
         const code = jsqr(
             qrCodeImageArray,
@@ -200,7 +200,7 @@ const createByScanning = async (req, res) => {
             const browser = await puppeteer.launch({
                 defaultViewport: {
                     width: 1280,
-                    height: 600,
+                    height: 2000,
                 },
             });
             const page = await browser.newPage();
@@ -212,9 +212,26 @@ const createByScanning = async (req, res) => {
         const bufferImage = Buffer.from(screenshot.split(",")[1], "base64");
         const data = await tesseract.recognize(bufferImage, "eng");
         const dataArray = data.data.text.split(" ");
-        for (let i of dataArray) {
-
-        }
+        const regExp = new RegExp("^\\d+$");
+        const numberDataArray = dataArray.filter(el => regExp.test(el)).sort();
+        const idxName = dataArray.indexOf("Name");
+        const volume = numberDataArray[numberDataArray.length - 1]
+        const nameOfMed = dataArray[idxName + 1];
+        const drug = await Drugs.create({
+            patient: patient._id,
+            drug: nameOfMed,
+            dosage,
+            volume,
+            slots,
+            critical: getCriticalLevel(volume),
+            remaining: volume,
+            uptoCriticalLevelDays: getDaysUptoCriticalLevel(volume, dosage, getCriticalLevel(volume), slots.length)
+        });
+        res.status(200).json({
+            success: true,
+            drug
+        });
+        return
     } catch (error) {
         if (error === "empty fields") {
             res.status(400).json({

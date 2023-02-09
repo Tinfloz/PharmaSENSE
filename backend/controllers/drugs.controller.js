@@ -2,6 +2,7 @@ import Patients from "../models/patient.model.js";
 import Drugs from "../models/drugs.model.js";
 import { getDaysUptoCriticalLevel } from "../utils/get.critical.day.js";
 import nodeCron from "node-cron";
+import mongoose from "mongoose"
 
 const getMyDrugs = async (req, res) => {
     try {
@@ -49,6 +50,7 @@ const deleteMedication = async (req, res) => {
         });
         return
     } catch (error) {
+        console.log(error)
         if (error === "drug not found") {
             res.status(404).json({
                 success: false,
