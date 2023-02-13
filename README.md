@@ -25,3 +25,8 @@ Patients get 3 options to add medicines to their profiles:
 ![image](https://user-images.githubusercontent.com/106631326/218514400-6349e1b3-4731-49c4-ad2a-c9364cda2768.png)
 ![image](https://user-images.githubusercontent.com/106631326/218514453-138fa595-8fac-4c9c-ae32-5c53ff7693f2.png)
 ![image](https://user-images.githubusercontent.com/106631326/218514502-8612803e-40b2-4da9-9da7-0669148b77ea.png)
+
+# Future
+1) Develop a mobile app.
+2) The OCR method to register medicines needs to be streamlined
+3) Add hardware component (IoT enabled bottles)
